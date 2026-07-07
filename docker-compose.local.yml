@@ -1,0 +1,36 @@
+services:
+
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /data/postgres
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db:/data/postgres
+    ports:
+      - "${DB_HOST_PORT}:${DB_PORT}"
+    networks:
+      - notes
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 7879:8080
+    networks:
+      - notes
+
+networks:
+  notes:
+    driver: bridge
+
+volumes:
+  db:
