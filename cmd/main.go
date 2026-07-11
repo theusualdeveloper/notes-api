@@ -52,12 +52,18 @@ func main() {
 			config.DBName,
 		)
 	}
-	_, err = db.NewDB(context.Background(), dsn)
+	pgxpool, err := db.NewDB(context.Background(), dsn)
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
 	logger.Info("database connected")
+	// running migrations
+	err = db.Run(context.Background(), pgxpool, "./migrations")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	logger.Info("server is starting on http://localhost:8080")
 	err = server.ListenAndServe()
 	if err != nil {
